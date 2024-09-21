@@ -2,6 +2,7 @@ use super::*;
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn new_branch_when_no_state_event_exists() -> Result<()> {
     generate_repo_with_state_event().await?;
     Ok(())
@@ -12,6 +13,7 @@ mod two_branches_in_batch_one_added_one_updated {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn updates_branch_on_git_server() -> Result<()> {
         let git_repo = prep_git_repo()?;
         let source_git_repo = GitTestRepo::recreate_as_bare(&git_repo)?;
@@ -31,7 +33,8 @@ mod two_branches_in_batch_one_added_one_updated {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -87,6 +90,7 @@ mod two_branches_in_batch_one_added_one_updated {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn remote_refs_updated_in_local_git() -> Result<()> {
         let git_repo = prep_git_repo()?;
         let source_git_repo = GitTestRepo::recreate_as_bare(&git_repo)?;
@@ -106,7 +110,8 @@ mod two_branches_in_batch_one_added_one_updated {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -173,6 +178,7 @@ mod two_branches_in_batch_one_added_one_updated {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn prints_git_helper_ok_respose() -> Result<()> {
         let git_repo = prep_git_repo()?;
         let source_git_repo = GitTestRepo::recreate_as_bare(&git_repo)?;
@@ -192,7 +198,8 @@ mod two_branches_in_batch_one_added_one_updated {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -215,8 +222,7 @@ mod two_branches_in_batch_one_added_one_updated {
             p.send_line("push refs/heads/main:refs/heads/main")?;
             p.send_line("push refs/heads/vnext:refs/heads/vnext")?;
             p.send_line("")?;
-            p.expect_eventually("ok ")?;
-            p.expect("refs/heads/main\r\n")?;
+            p.expect("ok refs/heads/main\r\n")?;
             p.expect("ok refs/heads/vnext\r\n")?;
             p.expect_eventually("\r\n\r\n")?;
             p.exit()?;
@@ -240,6 +246,7 @@ mod two_branches_in_batch_one_added_one_updated {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn when_no_existing_state_event_state_on_git_server_published_in_nostr_state_event()
     -> Result<()> {
         let git_repo = prep_git_repo()?;
@@ -260,7 +267,8 @@ mod two_branches_in_batch_one_added_one_updated {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -324,6 +332,7 @@ mod two_branches_in_batch_one_added_one_updated {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn existing_state_event_published_in_nostr_state_event() -> Result<()> {
         let (state_event, source_git_repo) = generate_repo_with_state_event().await?;
 
@@ -346,7 +355,8 @@ mod two_branches_in_batch_one_added_one_updated {
             state_event.clone(),
         ];
 
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -445,6 +455,7 @@ mod delete_one_branch {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn deletes_branch_on_git_server() -> Result<()> {
         let git_repo = prep_git_repo()?;
 
@@ -462,7 +473,8 @@ mod delete_one_branch {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -516,6 +528,7 @@ mod delete_one_branch {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn remote_refs_updated_in_local_git() -> Result<()> {
         let git_repo = prep_git_repo()?;
 
@@ -537,7 +550,8 @@ mod delete_one_branch {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -590,6 +604,7 @@ mod delete_one_branch {
 
     #[tokio::test]
     #[serial]
+    #[cfg(feature = "expensive_tests")]
     async fn prints_git_helper_ok_respose() -> Result<()> {
         let git_repo = prep_git_repo()?;
 
@@ -611,7 +626,8 @@ mod delete_one_branch {
                 source_git_repo.dir.to_str().unwrap().to_string(),
             ]),
         ];
-        // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+        // fallback (51,52) user write (53, 55) repo (55, 56) blaster
+        // (57)
         let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
             Relay::new(8051, None, None),
             Relay::new(8052, None, None),
@@ -627,8 +643,7 @@ mod delete_one_branch {
             let mut p = cli_tester_after_nostr_fetch_and_sent_list_for_push_responds(&git_repo)?;
             p.send_line("push :refs/heads/vnext")?;
             p.send_line("")?;
-            p.expect_eventually("ok ")?;
-            p.expect("refs/heads/vnext\r\n")?;
+            p.expect("ok refs/heads/vnext\r\n")?;
             p.expect_eventually("\r\n\r\n")?;
             p.exit()?;
             for p in [51, 52, 53, 55, 56, 57] {
@@ -654,6 +669,7 @@ mod delete_one_branch {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn state_event_updated_and_branch_deleted_and_ok_printed() -> Result<()> {
             let (state_event, source_git_repo) = generate_repo_with_state_event().await?;
 
@@ -669,7 +685,8 @@ mod delete_one_branch {
                 state_event.clone(),
             ];
 
-            // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+            // fallback (51,52) user write (53, 55) repo (55, 56)
+            // blaster (57)
             let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                 Relay::new(8051, None, None),
                 Relay::new(8052, None, None),
@@ -686,8 +703,7 @@ mod delete_one_branch {
                     cli_tester_after_nostr_fetch_and_sent_list_for_push_responds(&git_repo)?;
                 p.send_line("push :refs/heads/example-branch")?;
                 p.send_line("")?;
-                p.expect_eventually("ok ")?;
-                p.expect("refs/heads/example-branch\r\n")?;
+                p.expect("ok refs/heads/example-branch\r\n")?;
                 p.expect_eventually("\r\n\r\n")?;
                 p.exit()?;
                 for p in [51, 52, 53, 55, 56, 57] {
@@ -734,6 +750,7 @@ mod delete_one_branch {
 
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn existing_state_event_updated_and_ok_printed() -> Result<()> {
                 let (state_event, source_git_repo) = generate_repo_with_state_event().await?;
 
@@ -756,7 +773,8 @@ mod delete_one_branch {
                     state_event.clone(),
                 ];
 
-                // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
+                // fallback (51,52) user write (53, 55) repo (55, 56)
+                // blaster (57)
                 let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                     Relay::new(8051, None, None),
                     Relay::new(8052, None, None),
@@ -773,8 +791,7 @@ mod delete_one_branch {
                         cli_tester_after_nostr_fetch_and_sent_list_for_push_responds(&git_repo)?;
                     p.send_line("push :refs/heads/example-branch")?;
                     p.send_line("")?;
-                    p.expect_eventually("ok ")?;
-                    p.expect("refs/heads/example-branch\r\n")?;
+                    p.expect("ok refs/heads/example-branch\r\n")?;
                     p.expect_eventually("\r\n")?;
                     p.exit()?;
                     for p in [51, 52, 53, 55, 56, 57] {
@@ -821,6 +838,7 @@ mod delete_one_branch {
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn pushes_to_all_git_servers_listed_and_ok_printed() -> Result<()> {
     let (state_event, source_git_repo) = generate_repo_with_state_event().await?;
     let second_source_git_repo = GitTestRepo::duplicate(&source_git_repo)?;
@@ -858,8 +876,7 @@ async fn pushes_to_all_git_servers_listed_and_ok_printed() -> Result<()> {
         let mut p = cli_tester_after_nostr_fetch_and_sent_list_for_push_responds(&git_repo)?;
         p.send_line("push refs/heads/main:refs/heads/main")?;
         p.send_line("")?;
-        p.expect_eventually("ok ")?;
-        p.expect("refs/heads/main\r\n")?;
+        p.expect("ok refs/heads/main\r\n")?;
         p.expect_eventually("\r\n\r\n")?;
         p.exit()?;
         for p in [51, 52, 53, 55, 56, 57] {
@@ -894,6 +911,7 @@ async fn pushes_to_all_git_servers_listed_and_ok_printed() -> Result<()> {
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn proposal_merge_commit_pushed_to_main_leads_to_status_event_issued() -> Result<()> {
     //
     let (events, source_git_repo) = prep_source_repo_and_events_including_proposals().await?;
@@ -1046,6 +1064,7 @@ async fn proposal_merge_commit_pushed_to_main_leads_to_status_event_issued() -> 
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn push_2_commits_to_existing_proposal() -> Result<()> {
     let (events, source_git_repo) = prep_source_repo_and_events_including_proposals().await?;
     let source_path = source_git_repo.dir.to_str().unwrap().to_string();
@@ -1080,7 +1099,7 @@ async fn push_2_commits_to_existing_proposal() -> Result<()> {
         cli_expect_nostr_fetch(&mut p)?;
         p.expect(format!("fetching {} ref list over filesystem...\r\n", source_path).as_str())?;
         p.expect("list: connecting...\r\n\r\r\r")?;
-        p.expect_eventually_and_print(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
+        p.expect(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
         let output = p.expect_end_eventually()?;
 
         for p in [51, 52, 53, 55, 56, 57] {
@@ -1192,6 +1211,7 @@ async fn push_2_commits_to_existing_proposal() -> Result<()> {
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn force_push_creates_proposal_revision() -> Result<()> {
     let (events, source_git_repo) = prep_source_repo_and_events_including_proposals().await?;
     let source_path = source_git_repo.dir.to_str().unwrap().to_string();
@@ -1235,7 +1255,7 @@ async fn force_push_creates_proposal_revision() -> Result<()> {
         cli_expect_nostr_fetch(&mut p)?;
         p.expect(format!("fetching {} ref list over filesystem...\r\n", source_path).as_str())?;
         p.expect("list: connecting...\r\n")?;
-        p.expect_eventually_and_print(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
+        p.expect_after_whitespace(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
         let output = p.expect_end_eventually()?;
 
         for p in [51, 52, 53, 55, 56, 57] {
@@ -1347,6 +1367,7 @@ async fn force_push_creates_proposal_revision() -> Result<()> {
 
 #[tokio::test]
 #[serial]
+#[cfg(feature = "expensive_tests")]
 async fn push_new_pr_branch_creates_proposal() -> Result<()> {
     let (events, source_git_repo) = prep_source_repo_and_events_including_proposals().await?;
     let source_path = source_git_repo.dir.to_str().unwrap().to_string();
@@ -1385,7 +1406,7 @@ async fn push_new_pr_branch_creates_proposal() -> Result<()> {
         cli_expect_nostr_fetch(&mut p)?;
         p.expect(format!("fetching {} ref list over filesystem...\r\n", source_path).as_str())?;
         p.expect("list: connecting...\r\n\r\r\r")?;
-        p.expect_eventually_and_print(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
+        p.expect(format!("To {}\r\n", get_nostr_remote_url()?).as_str())?;
         let output = p.expect_end_eventually()?;
 
         for p in [51, 52, 53, 55, 56, 57] {

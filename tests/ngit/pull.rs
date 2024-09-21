@@ -11,6 +11,7 @@ mod when_main_is_checked_out {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn cli_show_error() -> Result<()> {
             let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                 Relay::new(8051, None, None),
@@ -67,6 +68,7 @@ mod when_branch_doesnt_exist {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn cli_show_error() -> Result<()> {
             let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                 Relay::new(8051, None, None),
@@ -130,6 +132,7 @@ mod when_branch_is_checked_out {
             use super::*;
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn cli_show_up_to_date() -> Result<()> {
                 let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                     Relay::new(8051, None, None),
@@ -236,6 +239,7 @@ mod when_branch_is_checked_out {
 
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn cli_applied_1_commit() -> Result<()> {
                 // fallback (51,52) user write (53, 55) repo (55, 56)
                 let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
@@ -292,6 +296,7 @@ mod when_branch_is_checked_out {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn proposal_branch_tip_is_most_recent_patch() -> Result<()> {
             let (originating_repo, test_repo) = prep_and_run().await?;
             assert_eq!(
@@ -313,6 +318,7 @@ mod when_branch_is_checked_out {
 
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn cli_output_correct() -> Result<()> {
                 let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                     Relay::new(8051, None, None),
@@ -396,7 +402,8 @@ mod when_branch_is_checked_out {
                     let (originating_repo, test_repo) =
                         create_proposals_and_repo_with_proposal_pulled_and_checkedout(1)?;
 
-                    // add another commit (so we have a local branch 1 ahead)
+                    // add another commit (so we have a local branch 1
+                    // ahead)
                     std::fs::write(test_repo.dir.join("ammended-commit.md"), "some content")?;
                     test_repo.stage_and_commit("add ammended-commit.md")?;
 
@@ -432,6 +439,7 @@ mod when_branch_is_checked_out {
 
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                 let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                     Relay::new(8051, None, None),
@@ -453,7 +461,8 @@ mod when_branch_is_checked_out {
                     let (_, test_repo) =
                         create_proposals_and_repo_with_proposal_pulled_and_checkedout(1)?;
 
-                    // add another commit (so we have a local branch 1 ahead)
+                    // add another commit (so we have a local
+                    // branch 1 ahead)
                     std::fs::write(test_repo.dir.join("ammended-commit.md"), "some content")?;
                     test_repo.stage_and_commit("add ammended-commit.md")?;
 
@@ -486,6 +495,7 @@ mod when_branch_is_checked_out {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn didnt_overwrite_local_appendments() -> Result<()> {
             let (originating_repo, test_repo) = prep_and_run().await?;
             assert_ne!(
@@ -552,6 +562,7 @@ mod when_branch_is_checked_out {
 
             #[tokio::test]
             #[serial]
+            #[cfg(feature = "expensive_tests")]
             async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                 let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                     Relay::new(8051, None, None),
@@ -600,6 +611,7 @@ mod when_branch_is_checked_out {
 
         #[tokio::test]
         #[serial]
+        #[cfg(feature = "expensive_tests")]
         async fn proposal_branch_tip_is_most_recent_proposal_revision_tip() -> Result<()> {
             let (originating_repo, test_repo) = prep_and_run().await?;
             assert_eq!(

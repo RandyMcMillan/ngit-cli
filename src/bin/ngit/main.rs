@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), warn(clippy::pedantic))]
 #![allow(clippy::large_futures)]
+#![allow(clippy::single_match_else)]
 #![cfg_attr(not(test), warn(clippy::expect_used))]
 
 use anyhow::Result;
