@@ -31,6 +31,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - run: nix develop --command rustup default ${{ matrix.rustup }}
+    - run: nix develop --command rustup show
     - run: nix develop --command cargo clippy
     - run: nix develop --command cargo fmt --all -- --check
     - run: nix develop --command cargo test
