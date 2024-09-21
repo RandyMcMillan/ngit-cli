@@ -21,7 +21,7 @@ jobs:
       NGIT: "ngit"
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-20.04]
         rustup: [stable, nightly]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
@@ -31,6 +31,10 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - run: nix develop --command rustup default ${{ matrix.rustup }}
+    - run: nix develop --command rustup show
     - run: nix develop --command cargo clippy
     - run: nix develop --command cargo fmt --all -- --check
-    - run: nix develop --command cargo test
+      # not used warnings are expected because they are used in the expensive_tests
+    - run: nix develop --command cargo test -- --nocapture
+      # not used warnings are not expoected with the --all-features flag
+    - run: nix develop --command cargo test --all-features
