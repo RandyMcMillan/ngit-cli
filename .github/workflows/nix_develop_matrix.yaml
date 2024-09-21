@@ -21,7 +21,7 @@ jobs:
       NGIT: "ngit"
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04]
+        os: [ubuntu-latest]
         rustup: [stable, nightly]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
