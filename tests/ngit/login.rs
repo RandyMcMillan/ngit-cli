@@ -3,7 +3,7 @@ use git::GitTestRepo;
 use serial_test::serial;
 use test_utils::*;
 
-static EXPECTED_NSEC_PROMPT: &str = "login with nostr address / nsec";
+static EXPECTED_NSEC_PROMPT: &str = "login with nsec / bunker url / nostr address";
 static EXPECTED_LOCAL_REPOSITORY_PROMPT: &str = "just for this repository?";
 static EXPECTED_REQUIRE_PASSWORD_PROMPT: &str = "require password?";
 static EXPECTED_SET_PASSWORD_PROMPT: &str = "encrypt with password";
@@ -29,6 +29,18 @@ fn standard_first_time_login_encrypting_nsec() -> Result<CliTester> {
     p.expect_end_eventually()?;
     Ok(p)
 }
+
+fn expect_qr_prompt_opt_for_other_methods(p: &mut CliTester) -> Result<()> {
+    p.expect_eventually("scan QR or paste into remote signer")?;
+    p.expect_eventually("\r\n")?;
+    p.expect_eventually("login with nsec / bunker url / nostr address instead")?;
+    p.expect_eventually("\r\n")?;
+    p.send_line("")?;
+    // p.expect_eventually("\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r")?;
+    // p.expect_eventually("\r\r\r\r\r\r\r\r\r\r\r\r\r")?;
+
+    Ok(())
+}
 mod with_relays {
     use anyhow::Ok;
     use futures::join;
@@ -43,8 +55,7 @@ mod with_relays {
         mod when_first_time_login {
             use super::*;
 
-            // falls_back_to_fallback_relays - this is implict in the
-            // tests
+            // falls_back_to_fallback_relays - this is implict in the tests
 
             mod dislays_logged_in_with_correct_name {
 
@@ -62,8 +73,8 @@ mod with_relays {
                     let cli_tester_handle = std::thread::spawn(move || -> Result<()> {
                         let test_repo = GitTestRepo::default();
                         let mut p = CliTester::new_from_dir(&test_repo.dir, ["login"]);
-
-                        p.expect_input(EXPECTED_NSEC_PROMPT)?
+                        expect_qr_prompt_opt_for_other_methods(&mut p)?;
+                        p.expect_input_eventually(EXPECTED_NSEC_PROMPT)?
                             .succeeds_with(TEST_KEY_1_NSEC)?;
 
                         p.expect_confirm(EXPECTED_LOCAL_REPOSITORY_PROMPT, Some(false))?
@@ -103,7 +114,8 @@ mod with_relays {
                         let test_repo = GitTestRepo::default();
                         let mut p = CliTester::new_from_dir(&test_repo.dir, ["login"]);
 
-                        p.expect_input(EXPECTED_NSEC_PROMPT)?
+                        expect_qr_prompt_opt_for_other_methods(&mut p)?;
+                        p.expect_input_eventually(EXPECTED_NSEC_PROMPT)?
                             .succeeds_with(TEST_KEY_1_NSEC)?;
 
                         p.expect_confirm(EXPECTED_LOCAL_REPOSITORY_PROMPT, Some(false))?
@@ -136,7 +148,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_latest_metadata_and_relay_list_on_all_relays() -> Result<()> {
                     run_test_displays_correct_name(
                         Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -170,7 +181,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn when_metadata_contains_only_display_name() -> Result<()> {
                         run_test_displays_correct_name(
                             Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -195,7 +205,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn when_metadata_contains_only_displayname() -> Result<()> {
                         println!(
                             "displayName: {}",
@@ -234,7 +243,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn displays_npub_when_metadata_contains_no_name_displayname_or_display_name()
                     -> Result<()> {
                         run_test_displays_fallback_to_npub(
@@ -261,7 +269,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_latest_metadata_and_relay_list_on_some_relays_but_others_have_none()
                 -> Result<()> {
                     run_test_displays_correct_name(
@@ -283,7 +290,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_latest_metadata_only_on_relay_and_relay_list_on_another() -> Result<()>
                 {
                     run_test_displays_correct_name(
@@ -309,7 +315,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_some_relays_return_old_metadata_event() -> Result<()> {
                     run_test_displays_correct_name(
                         Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -337,7 +342,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_some_relays_return_other_users_metadata() -> Result<()> {
                     run_test_displays_correct_name(
                         Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -365,7 +369,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn when_some_relays_return_other_event_kinds() -> Result<()> {
                     run_test_displays_correct_name(
                         Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -397,7 +400,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn displays_correct_name() -> Result<()> {
                         run_test_when_specifying_command_line_nsec_only_displays_correct_name(
                             Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -454,7 +456,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn displays_correct_name() -> Result<()> {
                         run_test_when_specifying_command_line_password_only_displays_correct_name(
                             Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -523,7 +524,6 @@ mod with_relays {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn displays_correct_name() -> Result<()> {
                         run_test_when_specifying_command_line_nsec_and_password_displays_correct_name(
                             Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -587,7 +587,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn warm_user_and_displays_npub() -> Result<()> {
                     run_test_when_no_metadata_found_warns_user_and_uses_npub(None, None).await
                 }
@@ -605,7 +604,8 @@ mod with_relays {
                         let test_repo = GitTestRepo::default();
                         let mut p = CliTester::new_from_dir(&test_repo.dir, ["login"]);
 
-                        p.expect_input(EXPECTED_NSEC_PROMPT)?
+                        expect_qr_prompt_opt_for_other_methods(&mut p)?;
+                        p.expect_input_eventually(EXPECTED_NSEC_PROMPT)?
                             .succeeds_with(TEST_KEY_1_NSEC)?;
 
                         p.expect_confirm(EXPECTED_LOCAL_REPOSITORY_PROMPT, Some(false))?
@@ -640,7 +640,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn warm_user_and_displays_name() -> Result<()> {
                     run_test_when_no_relay_list_found_warns_user_and_uses_npub(
                         Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -669,7 +668,8 @@ mod with_relays {
                         let test_repo = GitTestRepo::default();
                         let mut p = CliTester::new_from_dir(&test_repo.dir, ["login"]);
 
-                        p.expect_input(EXPECTED_NSEC_PROMPT)?
+                        expect_qr_prompt_opt_for_other_methods(&mut p)?;
+                        p.expect_input_eventually(EXPECTED_NSEC_PROMPT)?
                             .succeeds_with(TEST_KEY_1_NSEC)?;
 
                         p.expect_confirm(EXPECTED_LOCAL_REPOSITORY_PROMPT, Some(false))?
@@ -708,7 +708,6 @@ mod with_relays {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn dislays_logged_in_with_correct_name() -> Result<()> {
                     run_test_dislays_logged_in_with_correct_name(Some(
                         &|relay, client_id, subscription_id, _| -> Result<()> {
@@ -793,7 +792,8 @@ mod with_relays {
                     let test_repo = GitTestRepo::default();
                     let mut p = CliTester::new_from_dir(&test_repo.dir, ["login"]);
 
-                    p.expect_input(EXPECTED_NSEC_PROMPT)?
+                    expect_qr_prompt_opt_for_other_methods(&mut p)?;
+                    p.expect_input_eventually(EXPECTED_NSEC_PROMPT)?
                         .succeeds_with(TEST_KEY_1_NSEC)?;
 
                     p.expect_confirm(EXPECTED_LOCAL_REPOSITORY_PROMPT, Some(false))?
@@ -828,7 +828,6 @@ mod with_relays {
             /// this also tests that additional relays are queried
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn displays_correct_name() -> Result<()> {
                 run_test_displays_correct_name(
                     Some(&|relay, client_id, subscription_id, _| -> Result<()> {
@@ -860,22 +859,20 @@ mod with_relays {
     }
 }
 
-/// using the offline flag simplifies the test. relay interaction is
-/// tested seperately
+/// using the offline flag simplifies the test. relay interaction is tested
+/// seperately
 mod with_offline_flag {
     use super::*;
     mod when_first_time_login {
         use super::*;
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn prompts_for_nsec_and_password() -> Result<()> {
             standard_first_time_login_encrypting_nsec()?;
             Ok(())
         }
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn succeeds_with_text_logged_in_as_npub() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(&test_repo.dir, ["login", "--offline"]);
@@ -899,7 +896,6 @@ mod with_offline_flag {
         }
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn succeeds_with_hex_secret_key_in_place_of_nsec() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(&test_repo.dir, ["login", "--offline"]);
@@ -926,7 +922,6 @@ mod with_offline_flag {
             use super::*;
 
             #[test]
-            #[cfg(feature = "expensive_tests")]
             fn prompts_for_nsec_until_valid() -> Result<()> {
                 let invalid_nsec_response =
                     "invalid. try again with nostr address / bunker uri / nsec";
@@ -935,10 +930,9 @@ mod with_offline_flag {
                 let mut p = CliTester::new_from_dir(&test_repo.dir, ["login", "--offline"]);
 
                 p.expect_input(EXPECTED_NSEC_PROMPT)?
-                    // this behaviour is intentional. rejecting the
-                    // response with dialoguer hides the original
-                    // input from the user so they cannot see the
-                    // mistake they made.
+                    // this behaviour is intentional. rejecting the response with dialoguer
+                    // hides the original input from the user so they
+                    // cannot see the mistake they made.
                     .succeeds_with(TEST_INVALID_NSEC)?;
 
                 p.expect_input(invalid_nsec_response)?
@@ -968,7 +962,6 @@ mod with_offline_flag {
         use super::*;
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn valid_nsec_param_succeeds_without_prompts() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -982,7 +975,6 @@ mod with_offline_flag {
         }
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn forgets_identity() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -1006,7 +998,6 @@ mod with_offline_flag {
             use super::*;
 
             #[test]
-            #[cfg(feature = "expensive_tests")]
             fn valid_nsec_param_succeeds_without_prompts_and_logs_in() -> Result<()> {
                 standard_first_time_login_encrypting_nsec()?.exit()?;
                 let test_repo = GitTestRepo::default();
@@ -1021,7 +1012,6 @@ mod with_offline_flag {
             }
         }
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn invalid_nsec_param_fails_without_prompts() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -1039,7 +1029,6 @@ mod with_offline_flag {
         use super::*;
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn valid_nsec_param_succeeds_without_prompts() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -1058,7 +1047,6 @@ mod with_offline_flag {
         }
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn parameters_can_be_called_globally() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -1080,7 +1068,6 @@ mod with_offline_flag {
             use super::*;
 
             #[test]
-            #[cfg(feature = "expensive_tests")]
             fn valid_nsec_param_succeeds_without_prompts_and_logs_in() -> Result<()> {
                 standard_first_time_login_encrypting_nsec()?.exit()?;
                 let test_repo = GitTestRepo::default();
@@ -1104,7 +1091,6 @@ mod with_offline_flag {
             use super::*;
 
             #[test]
-            #[cfg(feature = "expensive_tests")]
             fn password_changes() -> Result<()> {
                 standard_first_time_login_encrypting_nsec()?.exit()?;
                 let test_repo = GitTestRepo::default();
@@ -1131,7 +1117,6 @@ mod with_offline_flag {
         }
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
         fn invalid_nsec_param_fails_without_prompts() -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p = CliTester::new_from_dir(
@@ -1155,14 +1140,14 @@ mod with_offline_flag {
         use super::*;
 
         #[test]
-        #[cfg(feature = "expensive_tests")]
-        // combined into a single test as it is computationally
-        // expensive to run
+        #[serial]
+        // combined into a single test as it is computationally expensive to run
         fn warns_it_might_take_a_few_seconds_then_succeeds_then_second_login_prompts_for_password_then_warns_again_then_succeeds()
         -> Result<()> {
             let test_repo = GitTestRepo::default();
             let mut p =
                 CliTester::new_with_timeout_from_dir(15000, &test_repo.dir, ["login", "--offline"]);
+
             p.expect_input(EXPECTED_NSEC_PROMPT)?
                 .succeeds_with(TEST_KEY_1_NSEC)?;
 
@@ -1182,8 +1167,8 @@ mod with_offline_flag {
 
             p.expect_end_with(format!("logged in as {}\r\n", TEST_KEY_1_NPUB).as_str())
 
-            // commented out as 'login' command now assumes you want
-            // to login as a new user
+            // commented out as 'login' command now assumes you want to
+            // login as a new user
             // p = CliTester::new_with_timeout(10000, ["login",
             // "--offline"]);
 
