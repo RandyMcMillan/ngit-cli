@@ -6,8 +6,7 @@ use test_utils::{git::GitTestRepo, *};
 fn expect_msgs_first(p: &mut CliTester) -> Result<()> {
     p.expect("searching for profile...\r\n")?;
     p.expect("logged in as fred\r\n")?;
-    // // p.expect("searching for existing claims on
-    // repository...\r\n")?;
+    // // p.expect("searching for existing claims on repository...\r\n")?;
     p.expect("publishing repostory reference...\r\n")?;
     Ok(())
 }
@@ -58,7 +57,6 @@ mod when_repo_not_previously_claimed {
 
         use super::*;
 
-        #[cfg(feature = "expensive_tests")]
         fn prep_git_repo() -> Result<GitTestRepo> {
             let test_repo = GitTestRepo::without_repo_in_git_config();
             test_repo.populate()?;
@@ -66,12 +64,10 @@ mod when_repo_not_previously_claimed {
             Ok(test_repo)
         }
 
-        #[cfg(feature = "expensive_tests")]
         fn cli_tester_init(git_repo: &GitTestRepo) -> CliTester {
             CliTester::new_from_dir(&git_repo.dir, get_cli_args())
         }
 
-        #[cfg(feature = "expensive_tests")]
         async fn prep_run_init() -> Result<(
             Relay<'static>,
             Relay<'static>,
@@ -81,8 +77,7 @@ mod when_repo_not_previously_claimed {
             Relay<'static>,
         )> {
             let git_repo = prep_git_repo()?;
-            // fallback (51,52) user write (53, 55) repo (55, 56)
-            // blaster (57)
+            // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
             let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                 Relay::new(
                     8051,
@@ -135,7 +130,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn only_1_repository_kind_event_sent_to_user_relays() -> Result<()> {
                 let (_, _, r53, r55, _, _) = prep_run_init().await?;
                 for relay in [&r53, &r55] {
@@ -153,7 +147,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn only_1_repository_kind_event_sent_to_specified_repo_relays() -> Result<()> {
                 let (_, _, _, r55, r56, _) = prep_run_init().await?;
                 for relay in [&r55, &r56] {
@@ -171,7 +164,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn only_1_repository_kind_event_sent_to_fallback_relays() -> Result<()> {
                 let (r51, r52, _, _, _, _) = prep_run_init().await?;
                 for relay in [&r51, &r52] {
@@ -189,7 +181,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn only_1_repository_kind_event_sent_to_blaster_relays() -> Result<()> {
                 let (_, _, _, _, _, r57) = prep_run_init().await?;
                 assert_eq!(
@@ -208,11 +199,9 @@ mod when_repo_not_previously_claimed {
 
             use super::*;
 
-            #[cfg(feature = "expensive_tests")]
             async fn async_run_test() -> Result<()> {
                 let git_repo = prep_git_repo()?;
-                // fallback (51,52) user write (53, 55) repo (55, 56)
-                // blaster (57)
+                // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
                 let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                     Relay::new(
                         8051,
@@ -283,7 +272,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn contains_identifier_maintainers_and_relays() -> Result<()> {
                 async_run_test().await
             }
@@ -291,11 +279,9 @@ mod when_repo_not_previously_claimed {
                 use std::io::Write;
 
                 use super::*;
-                #[cfg(feature = "expensive_tests")]
                 async fn async_run_test() -> Result<()> {
                     let git_repo = prep_git_repo()?;
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56) blaster (57)
+                    // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                         Relay::new(
                             8051,
@@ -378,7 +364,6 @@ mod when_repo_not_previously_claimed {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn adds_missing_identifier() -> Result<()> {
                     async_run_test().await
                 }
@@ -392,11 +377,9 @@ mod when_repo_not_previously_claimed {
 
             use super::*;
 
-            #[cfg(feature = "expensive_tests")]
             async fn async_run_test() -> Result<()> {
                 let git_repo = prep_git_repo()?;
-                // fallback (51,52) user write (53, 55) repo (55, 56)
-                // blaster (57)
+                // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
                 let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                     Relay::new(
                         8051,
@@ -461,7 +444,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn with_nostr_repo_set_to_user_and_identifer_naddr() -> Result<()> {
                 async_run_test().await?;
                 Ok(())
@@ -473,7 +455,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn d_replaceable_event_identifier() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -483,16 +464,15 @@ mod when_repo_not_previously_claimed {
                         .find(|e| e.kind.eq(&Kind::GitRepoAnnouncement))
                         .unwrap();
 
-                    assert!(event.tags.iter().any(|t| {
-                        t.as_vec()[0].eq("d") && t.as_vec()[1].eq("example-identifier")
-                    }));
+                    assert!(event.tags.iter().any(
+                        |t| t.as_slice()[0].eq("d") && t.as_slice()[1].eq("example-identifier")
+                    ));
                 }
                 Ok(())
             }
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn earliest_unique_commit_as_reference_with_euc_marker() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -502,18 +482,15 @@ mod when_repo_not_previously_claimed {
                         .find(|e| e.kind.eq(&Kind::GitRepoAnnouncement))
                         .unwrap();
 
-                    assert!(event.tags.iter().any(|t| {
-                        t.as_vec()[0].eq("r")
-                            && t.as_vec()[1].eq("9ee507fc4357d7ee16a5d8901bedcd103f23c17d")
-                            && t.as_vec()[2].eq("euc")
-                    }));
+                    assert!(event.tags.iter().any(|t| t.as_slice()[0].eq("r")
+                        && t.as_slice()[1].eq("9ee507fc4357d7ee16a5d8901bedcd103f23c17d")
+                        && t.as_slice()[2].eq("euc")));
                 }
                 Ok(())
             }
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn name() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -527,7 +504,8 @@ mod when_repo_not_previously_claimed {
                         event
                             .tags
                             .iter()
-                            .any(|t| t.as_vec()[0].eq("name") && t.as_vec()[1].eq("example-name"))
+                            .any(|t| t.as_slice()[0].eq("name")
+                                && t.as_slice()[1].eq("example-name"))
                     );
                 }
                 Ok(())
@@ -535,7 +513,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn alt() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -545,16 +522,14 @@ mod when_repo_not_previously_claimed {
                         .find(|e| e.kind.eq(&Kind::GitRepoAnnouncement))
                         .unwrap();
 
-                    assert!(event.tags.iter().any(|t| {
-                        t.as_vec()[0].eq("alt") && t.as_vec()[1].eq("git repository: example-name")
-                    }));
+                    assert!(event.tags.iter().any(|t| t.as_slice()[0].eq("alt")
+                        && t.as_slice()[1].eq("git repository: example-name")));
                 }
                 Ok(())
             }
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn description() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -564,16 +539,14 @@ mod when_repo_not_previously_claimed {
                         .find(|e| e.kind.eq(&Kind::GitRepoAnnouncement))
                         .unwrap();
 
-                    assert!(event.tags.iter().any(|t| {
-                        t.as_vec()[0].eq("description") && t.as_vec()[1].eq("example-description")
-                    }));
+                    assert!(event.tags.iter().any(|t| t.as_slice()[0].eq("description")
+                        && t.as_slice()[1].eq("example-description")));
                 }
                 Ok(())
             }
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn git_server() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -584,10 +557,8 @@ mod when_repo_not_previously_claimed {
                         .unwrap();
 
                     assert!(
-                        event.tags.iter().any(|t| {
-                            t.as_vec()[0].eq("clone")
-                                && t.as_vec()[1].eq("https://git.myhosting.com/my-repo.git")
-                        }) /* todo check it defaults to origin */
+                        event.tags.iter().any(|t| t.as_slice()[0].eq("clone")
+                            && t.as_slice()[1].eq("https://git.myhosting.com/my-repo.git")) /* todo check it defaults to origin */
                     );
                 }
                 Ok(())
@@ -595,7 +566,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn relays() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -607,9 +577,9 @@ mod when_repo_not_previously_claimed {
                     let relays_tag = event
                         .tags
                         .iter()
-                        .find(|t| t.as_vec()[0].eq("relays"))
+                        .find(|t| t.as_slice()[0].eq("relays"))
                         .unwrap()
-                        .as_vec();
+                        .as_slice();
                     assert_eq!(relays_tag[1], "ws://localhost:8055",);
                     assert_eq!(relays_tag[2], "ws://localhost:8056",);
                 }
@@ -618,7 +588,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn web() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -630,9 +599,9 @@ mod when_repo_not_previously_claimed {
                     let web_tag = event
                         .tags
                         .iter()
-                        .find(|t| t.as_vec()[0].eq("web"))
+                        .find(|t| t.as_slice()[0].eq("web"))
                         .unwrap()
-                        .as_vec();
+                        .as_slice();
                     assert_eq!(web_tag[1], "https://exampleproject.xyz",);
                     assert_eq!(web_tag[2], "https://gitworkshop.dev/123",);
                 }
@@ -641,7 +610,6 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn maintainers() -> Result<()> {
                 let (_, _, r53, r55, r56, r57) = prep_run_init().await?;
                 for relay in [&r53, &r55, &r56, &r57] {
@@ -653,9 +621,9 @@ mod when_repo_not_previously_claimed {
                     let maintainers_tag = event
                         .tags
                         .iter()
-                        .find(|t| t.as_vec()[0].eq("maintainers"))
+                        .find(|t| t.as_slice()[0].eq("maintainers"))
                         .unwrap()
-                        .as_vec();
+                        .as_slice();
                     assert_eq!(maintainers_tag[1], TEST_KEY_1_KEYS.public_key().to_string());
                 }
                 Ok(())
@@ -667,12 +635,10 @@ mod when_repo_not_previously_claimed {
 
             #[tokio::test]
             #[serial]
-            #[cfg(feature = "expensive_tests")]
             async fn check_cli_output() -> Result<()> {
                 let git_repo = prep_git_repo()?;
 
-                // fallback (51,52) user write (53, 55) repo (55, 56)
-                // blaster (57)
+                // fallback (51,52) user write (53, 55) repo (55, 56) blaster (57)
                 let (mut r51, mut r52, mut r53, mut r55, mut r56, mut r57) = (
                     Relay::new(
                         8051,
