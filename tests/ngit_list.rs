@@ -201,7 +201,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, None)?;
+                            c.succeeds_with(0, true, None)?;
                             p.expect(format!(
                                 "checked out proposal as 'pr/{}(",
                                 FEATURE_BRANCH_NAME_1,
@@ -327,7 +327,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect(format!(
                                 "checked out proposal as 'pr/{}(",
                                 FEATURE_BRANCH_NAME_3,
@@ -457,7 +457,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect_end_eventually_and_print()?;
 
                             for p in [51, 52, 53, 55, 56] {
@@ -539,7 +539,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect(format!(
                                 "checked out proposal as 'pr/{}(",
                                 FEATURE_BRANCH_NAME_4,
@@ -666,7 +666,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect_end_eventually()?;
 
                             test_repo.checkout("main")?;
@@ -692,7 +692,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect_end_eventually_and_print()?;
 
                             for p in [51, 52, 53, 55, 56] {
@@ -765,7 +765,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect_end_eventually()?;
 
                             test_repo.checkout("main")?;
@@ -791,7 +791,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect(format!(
                                 "checked out proposal as 'pr/{}(",
                                 FEATURE_BRANCH_NAME_1,
@@ -884,7 +884,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect("checked out proposal branch and applied 1 appendments (2 ahead 0 behind 'main')\r\n")?;
                             p.expect_end()?;
 
@@ -961,7 +961,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect("checked out proposal branch and applied 1 appendments (2 ahead 0 behind 'main')\r\n")?;
                             p.expect_end()?;
 
@@ -1083,7 +1083,7 @@ mod when_main_branch_is_uptodate {
                                     "back".to_string(),
                                 ],
                             )?;
-                            c.succeeds_with(1, false, Some(0))?;
+                            c.succeeds_with(1, true, Some(0))?;
 
                             p.expect_end_eventually_and_print()?;
 
@@ -1168,7 +1168,7 @@ mod when_main_branch_is_uptodate {
                                     "back".to_string(),
                                 ],
                             )?;
-                            c.succeeds_with(1, false, Some(1))?;
+                            c.succeeds_with(1, true, Some(1))?;
                             p.expect_end_with("checked out latest version of proposal (2 ahead 0 behind 'main'), replacing unpublished version (2 ahead 0 behind 'main')\r\n")?;
 
                             for p in [51, 52, 53, 55, 56] {
@@ -1267,7 +1267,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect("checked out proposal branch with 1 unpublished commits (3 ahead 0 behind 'main')\r\n")?;
                             p.expect_end()?;
 
@@ -1351,7 +1351,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect("checked out proposal branch with 1 unpublished commits (3 ahead 0 behind 'main')\r\n")?;
                             p.expect_end()?;
 
@@ -1456,7 +1456,7 @@ mod when_main_branch_is_uptodate {
                                     format!("back"),
                                 ],
                             )?;
-                            c.succeeds_with(0, false, Some(0))?;
+                            c.succeeds_with(0, true, Some(0))?;
                             p.expect("checked out new version of proposal (2 ahead 0 behind 'main'), replacing old version (2 ahead 1 behind 'main')\r\n")?;
                             p.expect_end()?;
 
@@ -1530,7 +1530,7 @@ mod when_main_branch_is_uptodate {
                                         format!("back"),
                                     ],
                                 )?;
-                                c.succeeds_with(0, false, Some(0))?;
+                                c.succeeds_with(0, true, Some(0))?;
                                 p.expect("checked out new version of proposal (2 ahead 0 behind 'main'), replacing old version (2 ahead 1 behind 'main')\r\n")?;
                                 p.expect_end()?;
 
