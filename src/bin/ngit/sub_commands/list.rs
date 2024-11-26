@@ -24,7 +24,7 @@ use crate::{
 
 #[allow(clippy::too_many_lines)]
 pub async fn launch() -> Result<()> {
-    let git_repo = Repo::discover().context("cannot find a git repository")?;
+    let git_repo = Repo::discover().context("failed to find a git repository")?;
     let git_repo_path = git_repo.get_path()?;
 
     // TODO: check for empty repo
@@ -179,7 +179,7 @@ pub async fn launch() -> Result<()> {
         }
 
         let cover_letter = event_to_cover_letter(proposals_for_status[selected_index])
-            .context("cannot extract proposal details from proposal root event")?;
+            .context("failed to extract proposal details from proposal root event")?;
 
         let commits_events: Vec<nostr::Event> = get_all_proposal_patch_events_from_cache(
             git_repo_path,
@@ -195,7 +195,7 @@ pub async fn launch() -> Result<()> {
                 PromptConfirmParms::default()
                     .with_default(true)
                     .with_prompt(
-                        "cannot find any patches on this proposal. choose another proposal?",
+                        "failed to find any patches on this proposal. choose another proposal?",
                     ),
             )? {
                 continue;
@@ -275,7 +275,7 @@ pub async fn launch() -> Result<()> {
             )?,
             "parent-commit",
         )?)
-        .context("cannot get valid parent commit id from patch")?;
+        .context("failed to get valid parent commit id from patch")?;
 
         let (main_branch_name, master_tip) = git_repo.get_main_or_master_branch()?;
 
@@ -307,9 +307,9 @@ pub async fn launch() -> Result<()> {
             &get_commit_id_from_patch(most_recent_proposal_patch_chain.first().context(
                 "there should be at least one patch as we have already checked for this",
             )?)
-            .context("cannot get valid commit_id from patch")?,
+            .context("failed to get valid commit_id from patch")?,
         )
-        .context("cannot get valid commit_id from patch")?;
+        .context("failed to get valid commit_id from patch")?;
 
         let (_, proposal_behind_main) =
             git_repo.get_commits_ahead_behind(&master_tip, &proposal_base_commit)?;
@@ -337,7 +337,7 @@ pub async fn launch() -> Result<()> {
                             &cover_letter.get_branch_name()?,
                             most_recent_proposal_patch_chain,
                         )
-                        .context("cannot apply patch chain")?;
+                        .context("failed to apply patch chain")?;
 
                     println!(
                         "checked out proposal as '{}' branch",
@@ -432,7 +432,7 @@ pub async fn launch() -> Result<()> {
                             &cover_letter.get_branch_name()?,
                             most_recent_proposal_patch_chain,
                         )
-                        .context("cannot apply patch chain")?;
+                        .context("failed to apply patch chain")?;
                     println!(
                         "checked out proposal branch and applied {} appendments ({} ahead {} behind '{main_branch_name}')",
                         &index,
@@ -489,7 +489,7 @@ pub async fn launch() -> Result<()> {
                             &cover_letter.get_branch_name()?,
                             most_recent_proposal_patch_chain,
                         )
-                        .context("cannot apply patch chain")?;
+                        .context("failed to apply patch chain")?;
                     println!(
                         "checked out new version of proposal ({} ahead {} behind '{main_branch_name}'), replacing old version ({} ahead {} behind '{main_branch_name}')",
                         chain_length,
@@ -522,7 +522,9 @@ pub async fn launch() -> Result<()> {
         else if git_repo.ancestor_of(&local_branch_tip, &proposal_tip)? {
             let (local_ahead_of_proposal, _) = git_repo
                 .get_commits_ahead_behind(&proposal_tip, &local_branch_tip)
-                .context("cannot get commits ahead behind for propsal_top and local_branch_tip")?;
+                .context(
+                    "failed to get commits ahead behind for propsal_top and local_branch_tip",
+                )?;
 
             println!(
                 "local proposal branch exists with {} unpublished commits on top of the most up-to-date version of the proposal ({} ahead {} behind '{main_branch_name}')",
@@ -629,7 +631,7 @@ pub async fn launch() -> Result<()> {
                         &cover_letter.get_branch_name()?,
                         most_recent_proposal_patch_chain,
                     )
-                    .context("cannot apply patch chain")?;
+                    .context("failed to apply patch chain")?;
 
                 git_repo.checkout(&cover_letter.get_branch_name()?)?;
                 println!(
@@ -720,7 +722,7 @@ fn save_patches_to_dir(mut patches: Vec<nostr::Event>, git_repo: &Repo) -> Resul
 fn check_clean(git_repo: &Repo) -> Result<()> {
     if git_repo.has_outstanding_changes()? {
         bail!(
-            "cannot pull proposal branch when repository is not clean. discard or stash (un)staged changes and try again."
+            "failed to pull proposal branch when repository is not clean. discard or stash (un)staged changes and try again."
         );
     }
     Ok(())
