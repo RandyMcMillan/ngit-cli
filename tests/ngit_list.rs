@@ -51,6 +51,7 @@ mod cannot_find_repo_event {
     use super::*;
     mod cli_prompts {
         use nostr::{nips::nip01::Coordinate, ToBech32};
+        use nostr_sdk::RelayUrl;
 
         use super::*;
         #[cfg(feature = "expensive_tests")]
@@ -93,7 +94,7 @@ mod cannot_find_repo_event {
                             kind: nostr::Kind::GitRepoAnnouncement,
                             public_key: TEST_KEY_1_KEYS.public_key(),
                             identifier: repo_event.tags.identifier().unwrap().to_string(),
-                            relays: vec!["ws://localhost:8056".to_string()],
+                            relays: vec![RelayUrl::parse("ws://localhost:8056").unwrap()],
                         }
                         .to_bech32()?,
                     )?;
