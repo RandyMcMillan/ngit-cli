@@ -3,7 +3,6 @@ use futures::join;
 use serial_test::serial;
 use test_utils::{git::GitTestRepo, relay::Relay, *};
 
-#[cfg(feature = "expensive_tests")]
 async fn prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(
     proposal_number: u16,
 ) -> Result<(GitTestRepo, GitTestRepo)> {
@@ -54,7 +53,6 @@ mod cannot_find_repo_event {
         use nostr_sdk::RelayUrl;
 
         use super::*;
-        #[cfg(feature = "expensive_tests")]
         async fn run_async_repo_event_ref_needed(invalid_input: bool, naddr: bool) -> Result<()> {
             let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                 Relay::new(8051, None, None),
@@ -78,29 +76,48 @@ mod cannot_find_repo_event {
                 test_repo.populate()?;
                 let mut p = CliTester::new_from_dir(&test_repo.dir, ["list"]);
                 p.expect(
-                    "hint: https://gitworkshop.dev/repos lists repositories and their naddr\r\n",
+                    "hint: https://gitworkshop.dev/repos lists repositories and their nostr address\r\n",
                 )?;
                 if invalid_input {
-                    let mut input = p.expect_input("repository naddr")?;
+                    let mut input = p.expect_input("nostr repository")?;
                     input.succeeds_with("dfgvfvfzadvd")?;
-                    p.expect("not a valid naddr\r\n")?;
-                    let _ = p.expect_input("repository naddr")?;
+                    p.expect("not a valid naddr or git nostr remote URL starting nostr://\r\n")?;
+                    let _ = p.expect_input("nostr repository")?;
                     p.exit()?;
                 }
                 if naddr {
-                    let mut input = p.expect_input("repository naddr")?;
-                    input.succeeds_with(
-                        &Coordinate {
-                            kind: nostr::Kind::GitRepoAnnouncement,
-                            public_key: TEST_KEY_1_KEYS.public_key(),
-                            identifier: repo_event.tags.identifier().unwrap().to_string(),
-                            relays: vec![RelayUrl::parse("ws://localhost:8056").unwrap()],
-                        }
-                        .to_bech32()?,
-                    )?;
+                    let mut input = p.expect_input("nostr repository")?;
+                    let coordinate = Coordinate {
+                        kind: nostr::Kind::GitRepoAnnouncement,
+                        public_key: TEST_KEY_1_KEYS.public_key(),
+                        identifier: repo_event.tags.identifier().unwrap().to_string(),
+                        relays: vec![RelayUrl::parse("ws://localhost:8056").unwrap()],
+                    };
+                    input.succeeds_with(&coordinate.to_bech32()?)?;
+                    p.expect("searching for repository...\r\n")?;
+                    p.expect_eventually("repository found\r\n")?;
+                    p.expect_confirm(
+                        "set git remote \"origin\" to nostr repository url?",
+                        Some(true),
+                    )?
+                    .succeeds_with(None)?;
+                    let nostr_url = format!(
+                        "nostr://{}/{}/{}",
+                        TEST_KEY_1_NPUB,
+                        // first relay in repo ann event
+                        urlencoding::encode("ws://localhost:8055"),
+                        coordinate.identifier,
+                    );
+                    p.expect(format!("set git remote \"origin\" to {}\r\n", &nostr_url))?;
                     p.expect("fetching updates...\r\n")?;
-                    p.expect_eventually("\r\n")?; // some updates listed here
+                    // no updates as they were fetched when searching for repo
+                    p.expect("no updates\r\n")?;
                     p.expect_end_with("no proposals found... create one? try `ngit send`\r\n")?;
+
+                    assert_eq!(
+                        test_repo.git_repo.find_remote("origin")?.url().unwrap(),
+                        nostr_url
+                    );
                 }
 
                 for p in [51, 52, 53, 55, 56] {
@@ -123,15 +140,13 @@ mod cannot_find_repo_event {
 
         #[tokio::test]
         #[serial]
-        #[cfg(feature = "expensive_tests")]
         async fn warns_not_valid_input_and_asks_again() -> Result<()> {
             run_async_repo_event_ref_needed(true, false).await
         }
 
         #[tokio::test]
         #[serial]
-        #[cfg(feature = "expensive_tests")]
-        async fn finds_based_on_naddr_on_embeded_relay() -> Result<()> {
+        async fn finds_based_on_naddr_on_embeded_relay_and_added_as_origin_remote() -> Result<()> {
             run_async_repo_event_ref_needed(false, true).await
         }
     }
@@ -148,15 +163,13 @@ mod when_main_branch_is_uptodate {
             mod when_first_proposal_selected {
                 use super::*;
 
-                // TODO: test when other proposals with the same name
-                // but from other repositories are       present
-                // on relays
+                // TODO: test when other proposals with the same name but from other
+                // repositories are       present on relays
 
                 mod cli_prompts {
                     use super::*;
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -231,7 +244,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_created_with_correct_name() -> Result<()> {
                     let (_, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(1).await?;
@@ -247,7 +259,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(1).await?;
@@ -260,7 +271,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_tip_is_most_recent_patch() -> Result<()> {
                     let (originating_repo, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(1).await?;
@@ -282,7 +292,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -357,7 +366,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_created_with_correct_name() -> Result<()> {
                     let (_, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(3).await?;
@@ -373,7 +381,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(3).await?;
@@ -386,7 +393,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_tip_is_most_recent_patch() -> Result<()> {
                     let (originating_repo, test_repo) =
                         prep_proposals_repo_and_repo_with_proposal_pulled_and_checkedout(3).await?;
@@ -404,8 +410,7 @@ mod when_main_branch_is_uptodate {
                 use super::*;
 
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -486,7 +491,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -523,7 +527,7 @@ mod when_main_branch_is_uptodate {
                             let mut c = p.expect_choice(
                                 "all proposals",
                                 vec![
-                                    format!("add d3.md"), /* commit msg title */
+                                    format!("add d3.md"), // commit msg title
                                     format!("\"{PROPOSAL_TITLE_3}\""),
                                     format!("\"{PROPOSAL_TITLE_2}\""),
                                     format!("\"{PROPOSAL_TITLE_1}\""),
@@ -569,7 +573,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_created_with_correct_name() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -584,7 +587,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -596,7 +598,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_tip_is_most_recent_patch() -> Result<()> {
                     let (originating_repo, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -621,8 +622,7 @@ mod when_main_branch_is_uptodate {
             mod when_branch_is_up_to_date {
                 use super::*;
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -721,7 +721,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -821,7 +820,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -836,8 +834,7 @@ mod when_main_branch_is_uptodate {
                 use super::*;
 
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -914,7 +911,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -988,7 +984,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -1000,7 +995,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_tip_is_most_recent_patch() -> Result<()> {
                     let (originating_repo, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -1015,12 +1009,10 @@ mod when_main_branch_is_uptodate {
             }
 
             mod when_latest_proposal_amended_locally {
-                // other rebase scenarios should work if this test
-                // passes
+                // other rebase scenarios should work if this test passes
                 use super::*;
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -1111,7 +1103,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn out_reflects_second_choice_discarding_old_and_applying_new()
                     -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
@@ -1194,7 +1185,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn second_choice_discarded_unpublished_commits_and_checked_out_latest_revision()
                 -> Result<()> {
                     let (originating_repo, test_repo) = prep_and_run().await?;
@@ -1213,8 +1203,7 @@ mod when_main_branch_is_uptodate {
             mod when_local_commits_on_uptodate_proposal {
                 use super::*;
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -1297,7 +1286,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -1319,8 +1307,7 @@ mod when_main_branch_is_uptodate {
                             let (_, test_repo) =
                                 create_proposals_and_repo_with_proposal_pulled_and_checkedout(1)?;
 
-                            // add another commit (so we have a
-                            // local branch 1 ahead)
+                            // add another commit (so we have a local branch 1 ahead)
                             std::fs::write(
                                 test_repo.dir.join("ammended-commit.md"),
                                 "some content",
@@ -1378,7 +1365,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -1390,7 +1376,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn didnt_overwrite_local_appendments() -> Result<()> {
                     let (originating_repo, test_repo) = prep_and_run().await?;
                     assert_ne!(
@@ -1411,8 +1396,7 @@ mod when_main_branch_is_uptodate {
                 use super::*;
 
                 async fn prep_and_run() -> Result<(GitTestRepo, GitTestRepo)> {
-                    // fallback (51,52) user write (53, 55) repo (55,
-                    // 56)
+                    // fallback (51,52) user write (53, 55) repo (55, 56)
                     let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                         Relay::new(8051, None, None),
                         Relay::new(8052, None, None),
@@ -1485,7 +1469,6 @@ mod when_main_branch_is_uptodate {
 
                     #[tokio::test]
                     #[serial]
-                    #[cfg(feature = "expensive_tests")]
                     async fn prompts_to_choose_from_proposal_titles() -> Result<()> {
                         let (mut r51, mut r52, mut r53, mut r55, mut r56) = (
                             Relay::new(8051, None, None),
@@ -1558,7 +1541,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_checked_out() -> Result<()> {
                     let (_, test_repo) = prep_and_run().await?;
                     assert_eq!(
@@ -1570,7 +1552,6 @@ mod when_main_branch_is_uptodate {
 
                 #[tokio::test]
                 #[serial]
-                #[cfg(feature = "expensive_tests")]
                 async fn proposal_branch_tip_is_most_recent_proposal_revision_tip() -> Result<()> {
                     let (originating_repo, test_repo) = prep_and_run().await?;
                     assert_eq!(
