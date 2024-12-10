@@ -523,7 +523,7 @@ async fn prompt_to_set_nostr_url_as_origin(repo_ref: &RepoRef, git_repo: &Repo) 
         }
     }
     println!("contributors can clone your repository by installing ngit and using this clone url:");
-    println!("{}", repo_ref.to_nostr_git_url());
+    println!("{}", repo_ref.to_nostr_git_url(&Some(git_repo)));
 
     Ok(())
 }
@@ -536,7 +536,7 @@ fn ask_to_set_origin_remote(repo_ref: &RepoRef, git_repo: &Repo) -> Result<()> {
     )? {
         git_repo
             .git_repo
-            .remote_set_url("origin", &repo_ref.to_nostr_git_url())?;
+            .remote_set_url("origin", &repo_ref.to_nostr_git_url(&Some(git_repo)))?;
     }
     Ok(())
 }
@@ -549,7 +549,7 @@ fn ask_to_create_new_origin_remote(repo_ref: &RepoRef, git_repo: &Repo) -> Resul
     )? {
         git_repo
             .git_repo
-            .remote("origin", &repo_ref.to_nostr_git_url())?;
+            .remote("origin", &repo_ref.to_nostr_git_url(&Some(git_repo)))?;
     }
     Ok(())
 }
