@@ -255,7 +255,7 @@ impl RepoRef {
             .unwrap_or_default(),
             coordinate: c,
             protocol: None,
-            user: None,
+            ssh_key_file: None,
         }
     }
 }

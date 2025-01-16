@@ -2,6 +2,8 @@ use core::str;
 use std::{
     collections::{HashMap, HashSet},
     io::Stdin,
+    path::PathBuf,
+    str::FromStr,
     sync::{Arc, Mutex},
     time::Instant,
 };
@@ -22,7 +24,7 @@ use ngit::{
     client::{self, get_event_from_cache_by_id},
     git::{
         self,
-        nostr_url::{CloneUrl, NostrUrlDecoded},
+        nostr_url::{CloneUrl, NostrUrlDecoded, ServerProtocol},
         oid_to_shorthand_string,
     },
     git_events::{self, event_to_cover_letter, get_event_root},
@@ -423,12 +425,28 @@ fn push_to_remote(
     for protocol in &protocols_to_attempt {
         term.write_line(format!("push: {} over {protocol}...", server_url.short_name(),).as_str())?;
 
-        let formatted_url = server_url.format_as(protocol, &decoded_nostr_url.user)?;
+        let formatted_url = server_url.format_as(protocol)?;
 
-        if let Err(error) = push_to_remote_url(git_repo, &formatted_url, remote_refspecs, term) {
-            term.write_line(
-                format!("push: {formatted_url} failed over {protocol}: {error}").as_str(),
-            )?;
+        if let Err(error) = push_to_remote_url(
+            git_repo,
+            &formatted_url,
+            decoded_nostr_url.ssh_key_file_path().as_ref(),
+            remote_refspecs,
+            term,
+        ) {
+            term.write_line(&format!(
+                "push: {formatted_url} failed over {protocol}{}: {error}",
+                if protocol == &ServerProtocol::Ssh {
+                    if let Some(ssh_key_file) = &decoded_nostr_url.ssh_key_file_path() {
+                        format!(" with ssh key from {ssh_key_file}")
+                    } else {
+                        String::new()
+                    }
+                } else {
+                    String::new()
+                }
+            ))?;
+
             failed_protocols.push(protocol);
             if push_error_is_not_authentication_failure(&error) {
                 break;
@@ -463,12 +481,24 @@ fn push_to_remote(
 fn push_to_remote_url(
     git_repo: &Repo,
     git_server_url: &str,
+    ssh_key_file: Option<&String>,
     remote_refspecs: &[String],
     term: &Term,
 ) -> Result<()> {
     let git_config = git_repo.git_repo.config()?;
     let mut git_server_remote = git_repo.git_repo.remote_anonymous(git_server_url)?;
-    let auth = GitAuthenticator::default();
+    let auth = {
+        if git_server_url.contains("git@") {
+            if let Some(ssh_key_file) = ssh_key_file {
+                GitAuthenticator::default()
+                    .add_ssh_key_from_file(PathBuf::from_str(ssh_key_file)?, None)
+            } else {
+                GitAuthenticator::default()
+            }
+        } else {
+            GitAuthenticator::default()
+        }
+    };
     let mut push_options = git2::PushOptions::new();
     let mut remote_callbacks = git2::RemoteCallbacks::new();
     let push_reporter = Arc::new(Mutex::new(PushReporter::new(term)));

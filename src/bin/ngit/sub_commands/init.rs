@@ -482,7 +482,7 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
                         },
                     },
                     protocol: None,
-                    user: None,
+                    ssh_key_file: None,
                 });
                 if inter.next().is_some() {
                     "note: point your NIP-05 relays to one of the repo relays for a cleaner nostr:// remote URL.".to_string()
@@ -543,6 +543,8 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
             "this optional file helps in identifying who the maintainers are over time through the commit history"
         );
     }
+
+    println!("view on https://gitworkshop.dev/r/dan@gitworkhop.dev/ngit");
     Ok(())
 }
 
