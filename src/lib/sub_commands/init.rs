@@ -1,23 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::client;
-use crate::{
-    cli::{Cli, extract_signer_cli_arguments},
-    cli_interactor::{Interactor, InteractorPrompt, PromptInputParms},
-    client::{
-        Client, Connect, MockClient, fetching_with_report, get_repo_ref_from_cache, send_events,
-    },
-    git::{Repo, RepoActions, nostr_url::convert_clone_url_to_https},
-    login,
-    repo_ref::{
-        RepoRef, extract_pks, get_repo_config_from_yaml, save_repo_config_to_yaml,
-        try_and_get_repo_coordinates_when_remote_unknown,
-    },
-};
-use crate::{
-    cli_interactor::PromptConfirmParms,
-    git::nostr_url::{NostrUrlDecoded, save_nip05_to_git_config_cache},
-};
 use anyhow::{Context, Result};
 use console::{Style, Term};
 use nostr::{
@@ -29,6 +11,24 @@ use nostr::{
     },
 };
 use nostr_sdk::{Kind, RelayUrl};
+
+use crate::{
+    cli::{Cli, extract_signer_cli_arguments},
+    cli_interactor::{Interactor, InteractorPrompt, PromptConfirmParms, PromptInputParms},
+    client,
+    client::{
+        Client, Connect, MockClient, fetching_with_report, get_repo_ref_from_cache, send_events,
+    },
+    git::{
+        Repo, RepoActions,
+        nostr_url::{NostrUrlDecoded, convert_clone_url_to_https, save_nip05_to_git_config_cache},
+    },
+    login,
+    repo_ref::{
+        RepoRef, extract_pks, get_repo_config_from_yaml, save_repo_config_to_yaml,
+        try_and_get_repo_coordinates_when_remote_unknown,
+    },
+};
 #[derive(Debug, clap::Args)]
 pub struct SubCommandArgs {
     #[clap(short, long)]

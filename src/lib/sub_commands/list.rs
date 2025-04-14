@@ -1,29 +1,24 @@
 use std::{io::Write, ops::Add};
 
-use crate::{
-    client::{get_all_proposal_patch_events_from_cache, get_proposals_and_revisions_from_cache},
-    git_events::{
-        get_commit_id_from_patch, get_most_recent_patch_with_ancestors, status_kinds, tag_value,
-    },
-};
 use anyhow::{Context, Result, bail};
 use nostr_sdk::Kind;
 
 use crate::{
     cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms, PromptConfirmParms},
+    client,
     client::{
-        Client, Connect, MockClient, fetching_with_report, get_events_from_local_cache,
-        get_repo_ref_from_cache,
+        Client, Connect, MockClient, fetching_with_report,
+        get_all_proposal_patch_events_from_cache, get_events_from_local_cache,
+        get_proposals_and_revisions_from_cache, get_repo_ref_from_cache,
     },
     git::{Repo, RepoActions, str_to_sha1},
     git_events::{
         commit_msg_from_patch_oneliner, event_is_revision_root, event_to_cover_letter,
-        patch_supports_commit_ids,
+        get_commit_id_from_patch, get_most_recent_patch_with_ancestors, patch_supports_commit_ids,
+        status_kinds, tag_value,
     },
     repo_ref::get_repo_coordinates_when_remote_unknown,
 };
-
-use crate::client;
 
 #[allow(clippy::too_many_lines)]
 pub async fn launch() -> Result<()> {

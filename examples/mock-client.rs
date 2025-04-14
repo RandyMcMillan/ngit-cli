@@ -26,6 +26,16 @@ use futures::{
     future::join_all,
     stream::{self, StreamExt},
 };
+use gnostr_ngit::{
+    get_dirs,
+    git::{Repo, RepoActions},
+    git_events::{
+        event_is_cover_letter, event_is_patch_set_root, event_is_revision_root, status_kinds,
+    },
+    login::{get_likely_logged_in_user, user::get_user_ref_from_cache},
+    repo_ref::{RepoRef, try_and_get_repo_coordinates_when_remote_unknown},
+    repo_state::RepoState,
+};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressState, ProgressStyle};
 use mockall::mock;
 #[cfg(test)]
@@ -42,19 +52,6 @@ use nostr_sdk::{
     EventBuilder, EventId, Kind, NostrSigner, Options, PublicKey, RelayUrl, SingleLetterTag,
     Timestamp, prelude::RelayLimits,
 };
-
-use gnostr_ngit::{
-    get_dirs,
-    git::{Repo, RepoActions},
-    git_events::{
-        event_is_cover_letter, event_is_patch_set_root, event_is_revision_root, status_kinds,
-    },
-    login::{get_likely_logged_in_user, user::get_user_ref_from_cache},
-    repo_ref::RepoRef,
-    repo_state::RepoState,
-};
-
-use gnostr_ngit::repo_ref::try_and_get_repo_coordinates_when_remote_unknown;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
