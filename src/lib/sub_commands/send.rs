@@ -1,13 +1,5 @@
 use std::path::Path;
 
-use anyhow::{Context, Result, bail};
-use console::Style;
-use crate::{client::send_events, git_events::generate_cover_letter_and_patch_events};
-use nostr::{
-    ToBech32,
-    nips::{nip10::Marker, nip19::Nip19Event},
-};
-use nostr_sdk::hashes::sha1::Hash as Sha1Hash;
 use crate::client;
 use crate::{
     cli::{Cli, extract_signer_cli_arguments},
@@ -15,13 +7,22 @@ use crate::{
         Interactor, InteractorPrompt, PromptConfirmParms, PromptInputParms, PromptMultiChoiceParms,
     },
     client::{
-        MockClient, Client, Connect, fetching_with_report, get_events_from_local_cache, get_repo_ref_from_cache,
+        Client, Connect, MockClient, fetching_with_report, get_events_from_local_cache,
+        get_repo_ref_from_cache,
     },
     git::{Repo, RepoActions, identify_ahead_behind},
     git_events::{event_is_patch_set_root, event_tag_from_nip19_or_hex},
     login,
     repo_ref::get_repo_coordinates_when_remote_unknown,
 };
+use crate::{client::send_events, git_events::generate_cover_letter_and_patch_events};
+use anyhow::{Context, Result, bail};
+use console::Style;
+use nostr::{
+    ToBech32,
+    nips::{nip10::Marker, nip19::Nip19Event},
+};
+use nostr_sdk::hashes::sha1::Hash as Sha1Hash;
 
 #[derive(Debug, clap::Args)]
 pub struct SubCommandArgs {
@@ -54,16 +55,15 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs, no_fetch: bool) -> Re
 
     #[cfg(test)]
     let mut client = &mut <client::MockConnect as client::Connect>::default();
-	#[cfg(not(test))]
+    #[cfg(not(test))]
     let mut client = Client::default();
-
 
     let repo_coordinates = get_repo_coordinates_when_remote_unknown(&git_repo, &client).await?;
 
     if !no_fetch {
-		#[cfg(test)]
+        #[cfg(test)]
         fetching_with_report(git_repo_path, &client, &repo_coordinates).await?;
-		#[cfg(not(test))]
+        #[cfg(not(test))]
         fetching_with_report(git_repo_path, &client, &repo_coordinates).await?;
     }
 
@@ -187,7 +187,6 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs, no_fetch: bool) -> Re
         &Some(&git_repo),
         &extract_signer_cli_arguments(cli_args).unwrap_or(None),
         &cli_args.password,
-
         #[cfg(test)]
         Some(&<client::MockConnect as client::Connect>::default()),
         #[cfg(not(test))]
@@ -236,10 +235,10 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs, no_fetch: bool) -> Re
     );
 
     send_events(
-		#[cfg(test)]
-		 &<client::MockConnect as client::Connect>::default(),
+        #[cfg(test)]
+        &<client::MockConnect as client::Connect>::default(),
         #[cfg(not(test))]
-		&client,
+        &client,
         Some(git_repo_path),
         events.clone(),
         user_ref.relays.write(),
@@ -389,9 +388,10 @@ async fn get_root_proposal_id_and_mentions_from_in_reply_to(
                 public_key: _,
                 uppercase: false,
             }) => {
-                let events = get_events_from_local_cache(git_repo_path, vec![
-                    nostr::Filter::new().id(*event_id),
-                ])
+                let events = get_events_from_local_cache(
+                    git_repo_path,
+                    vec![nostr::Filter::new().id(*event_id)],
+                )
                 .await?;
 
                 if let Some(first) = events.iter().find(|e| e.id.eq(event_id)) {

@@ -1,18 +1,18 @@
-use anyhow::{Context, Result};
-use clap;
 use crate::{
     cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms},
     git::{get_git_config_item, remove_git_config_item},
     login::{SignerInfoSource, existing::load_existing_login},
 };
+use anyhow::{Context, Result};
+use clap;
 
+use crate::client;
 use crate::{
     cli::{Cli, extract_signer_cli_arguments},
     client::{Client, Connect},
     git::Repo,
     login::fresh::fresh_login_or_signup,
 };
- use crate::client;
 #[derive(clap::Args)]
 pub struct SubCommandArgs {
     /// login to the local git repository only
@@ -25,14 +25,13 @@ pub struct SubCommandArgs {
 }
 
 pub async fn launch(args: &Cli, command_args: &SubCommandArgs) -> Result<()> {
-
-	#[cfg(not(test))]
+    #[cfg(not(test))]
     let client = if command_args.offline {
         None
     } else {
         Some(Client::default())
     };
-	#[cfg(test)]
+    #[cfg(test)]
     let client = if command_args.offline {
         None
     } else {

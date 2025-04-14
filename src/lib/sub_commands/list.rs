@@ -1,18 +1,19 @@
 use std::{io::Write, ops::Add};
 
-use anyhow::{Context, Result, bail};
 use crate::{
     client::{get_all_proposal_patch_events_from_cache, get_proposals_and_revisions_from_cache},
     git_events::{
         get_commit_id_from_patch, get_most_recent_patch_with_ancestors, status_kinds, tag_value,
     },
 };
+use anyhow::{Context, Result, bail};
 use nostr_sdk::Kind;
 
 use crate::{
     cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms, PromptConfirmParms},
     client::{
-        MockClient, Client, Connect, fetching_with_report, get_events_from_local_cache, get_repo_ref_from_cache,
+        Client, Connect, MockClient, fetching_with_report, get_events_from_local_cache,
+        get_repo_ref_from_cache,
     },
     git::{Repo, RepoActions, str_to_sha1},
     git_events::{
@@ -32,7 +33,6 @@ pub async fn launch() -> Result<()> {
     // TODO: check for empty repo
     // TODO: check for existing maintaiers file
     // TODO: check for other claims
-
 
     #[cfg(test)]
     let mut client = &<client::MockConnect as client::Connect>::default();
@@ -54,11 +54,14 @@ pub async fn launch() -> Result<()> {
     }
 
     let statuses: Vec<nostr::Event> = {
-        let mut statuses = get_events_from_local_cache(git_repo_path, vec![
-            nostr::Filter::default()
-                .kinds(status_kinds().clone())
-                .events(proposals_and_revisions.iter().map(|e| e.id)),
-        ])
+        let mut statuses = get_events_from_local_cache(
+            git_repo_path,
+            vec![
+                nostr::Filter::default()
+                    .kinds(status_kinds().clone())
+                    .events(proposals_and_revisions.iter().map(|e| e.id)),
+            ],
+        )
         .await?;
         statuses.sort_by_key(|e| e.created_at);
         statuses.reverse();

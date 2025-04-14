@@ -27,9 +27,9 @@ use futures::{
     stream::{self, StreamExt},
 };
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressState, ProgressStyle};
+use mockall::mock;
 #[cfg(test)]
 use mockall::*;
-use mockall::mock;
 use nostr::{
     Event,
     nips::{nip01::Coordinate, nip19::Nip19Coordinate},
@@ -955,16 +955,18 @@ pub async fn get_state_from_cache(
 ) -> Result<RepoState> {
     if let Some(git_repo_path) = git_repo_path {
         RepoState::try_from(
-            get_events_from_local_cache(git_repo_path, vec![get_filter_state_events(
-                &repo_ref.coordinates(),
-            )])
+            get_events_from_local_cache(
+                git_repo_path,
+                vec![get_filter_state_events(&repo_ref.coordinates())],
+            )
             .await?,
         )
     } else {
         RepoState::try_from(
-            get_event_from_global_cache(git_repo_path, vec![get_filter_state_events(
-                &repo_ref.coordinates(),
-            )])
+            get_event_from_global_cache(
+                git_repo_path,
+                vec![get_filter_state_events(&repo_ref.coordinates())],
+            )
             .await?,
         )
     }
@@ -1036,17 +1038,20 @@ async fn create_relays_request(
         }
 
         if let Some(git_repo_path) = git_repo_path {
-            for event in &get_events_from_local_cache(git_repo_path, vec![
-                nostr::Filter::default()
-                    .kinds(vec![Kind::GitPatch])
-                    .custom_tags(
-                        SingleLetterTag::lowercase(nostr_sdk::Alphabet::A),
-                        repo_coordinates_without_relays
-                            .iter()
-                            .map(|c| c.coordinate.to_string())
-                            .collect::<Vec<String>>(),
-                    ),
-            ])
+            for event in &get_events_from_local_cache(
+                git_repo_path,
+                vec![
+                    nostr::Filter::default()
+                        .kinds(vec![Kind::GitPatch])
+                        .custom_tags(
+                            SingleLetterTag::lowercase(nostr_sdk::Alphabet::A),
+                            repo_coordinates_without_relays
+                                .iter()
+                                .map(|c| c.coordinate.to_string())
+                                .collect::<Vec<String>>(),
+                        ),
+                ],
+            )
             .await?
             {
                 if event_is_patch_set_root(event) || event_is_revision_root(event) {
@@ -1056,11 +1061,11 @@ async fn create_relays_request(
             }
         }
 
-        let profile_events =
-            get_event_from_global_cache(git_repo_path, vec![get_filter_contributor_profiles(
-                contributors.clone(),
-            )])
-            .await?;
+        let profile_events = get_event_from_global_cache(
+            git_repo_path,
+            vec![get_filter_contributor_profiles(contributors.clone())],
+        )
+        .await?;
         for c in &contributors {
             if let Some(event) = profile_events
                 .iter()
@@ -1626,17 +1631,20 @@ pub async fn get_proposals_and_revisions_from_cache(
     git_repo_path: &Path,
     repo_coordinates: HashSet<Nip19Coordinate>,
 ) -> Result<Vec<nostr::Event>> {
-    let mut proposals = get_events_from_local_cache(git_repo_path, vec![
-        nostr::Filter::default()
-            .kind(nostr::Kind::GitPatch)
-            .custom_tags(
-                nostr::SingleLetterTag::lowercase(nostr_sdk::Alphabet::A),
-                repo_coordinates
-                    .iter()
-                    .map(|c| c.coordinate.to_string())
-                    .collect::<Vec<String>>(),
-            ),
-    ])
+    let mut proposals = get_events_from_local_cache(
+        git_repo_path,
+        vec![
+            nostr::Filter::default()
+                .kind(nostr::Kind::GitPatch)
+                .custom_tags(
+                    nostr::SingleLetterTag::lowercase(nostr_sdk::Alphabet::A),
+                    repo_coordinates
+                        .iter()
+                        .map(|c| c.coordinate.to_string())
+                        .collect::<Vec<String>>(),
+                ),
+        ],
+    )
     .await?
     .iter()
     .filter(|e| event_is_patch_set_root(e))
@@ -1652,23 +1660,29 @@ pub async fn get_all_proposal_patch_events_from_cache(
     repo_ref: &RepoRef,
     proposal_id: &nostr::EventId,
 ) -> Result<Vec<nostr::Event>> {
-    let mut commit_events = get_events_from_local_cache(git_repo_path, vec![
-        nostr::Filter::default()
-            .kind(nostr::Kind::GitPatch)
-            .event(*proposal_id),
-        nostr::Filter::default()
-            .kind(nostr::Kind::GitPatch)
-            .id(*proposal_id),
-    ])
+    let mut commit_events = get_events_from_local_cache(
+        git_repo_path,
+        vec![
+            nostr::Filter::default()
+                .kind(nostr::Kind::GitPatch)
+                .event(*proposal_id),
+            nostr::Filter::default()
+                .kind(nostr::Kind::GitPatch)
+                .id(*proposal_id),
+        ],
+    )
     .await?;
 
-    let permissioned_users: HashSet<PublicKey> = [repo_ref.maintainers.clone(), vec![
-        commit_events
-            .iter()
-            .find(|e| e.id.eq(proposal_id))
-            .context("proposal not in cache")?
-            .pubkey,
-    ]]
+    let permissioned_users: HashSet<PublicKey> = [
+        repo_ref.maintainers.clone(),
+        vec![
+            commit_events
+                .iter()
+                .find(|e| e.id.eq(proposal_id))
+                .context("proposal not in cache")?
+                .pubkey,
+        ],
+    ]
     .concat()
     .iter()
     .copied()
@@ -1682,12 +1696,15 @@ pub async fn get_all_proposal_patch_events_from_cache(
         .collect();
 
     if !revision_roots.is_empty() {
-        for event in get_events_from_local_cache(git_repo_path, vec![
-            nostr::Filter::default()
-                .kind(nostr::Kind::GitPatch)
-                .events(revision_roots)
-                .authors(permissioned_users.clone()),
-        ])
+        for event in get_events_from_local_cache(
+            git_repo_path,
+            vec![
+                nostr::Filter::default()
+                    .kind(nostr::Kind::GitPatch)
+                    .events(revision_roots)
+                    .authors(permissioned_users.clone()),
+            ],
+        )
         .await?
         {
             commit_events.push(event);
@@ -1702,9 +1719,10 @@ pub async fn get_all_proposal_patch_events_from_cache(
 }
 
 pub async fn get_event_from_cache_by_id(git_repo: &Repo, event_id: &EventId) -> Result<Event> {
-    Ok(get_events_from_local_cache(git_repo.get_path()?, vec![
-        nostr::Filter::default().id(*event_id),
-    ])
+    Ok(get_events_from_local_cache(
+        git_repo.get_path()?,
+        vec![nostr::Filter::default().id(*event_id)],
+    )
     .await?
     .first()
     .context("failed to find event in cache")?

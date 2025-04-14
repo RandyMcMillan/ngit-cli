@@ -1,11 +1,25 @@
 use std::collections::{HashMap, HashSet};
 
-use anyhow::{Context, Result};
-use console::{Style, Term};
+use crate::client;
+use crate::{
+    cli::{Cli, extract_signer_cli_arguments},
+    cli_interactor::{Interactor, InteractorPrompt, PromptInputParms},
+    client::{
+        Client, Connect, MockClient, fetching_with_report, get_repo_ref_from_cache, send_events,
+    },
+    git::{Repo, RepoActions, nostr_url::convert_clone_url_to_https},
+    login,
+    repo_ref::{
+        RepoRef, extract_pks, get_repo_config_from_yaml, save_repo_config_to_yaml,
+        try_and_get_repo_coordinates_when_remote_unknown,
+    },
+};
 use crate::{
     cli_interactor::PromptConfirmParms,
     git::nostr_url::{NostrUrlDecoded, save_nip05_to_git_config_cache},
 };
+use anyhow::{Context, Result};
+use console::{Style, Term};
 use nostr::{
     FromBech32, PublicKey, ToBech32,
     nips::{
@@ -15,18 +29,6 @@ use nostr::{
     },
 };
 use nostr_sdk::{Kind, RelayUrl};
-use crate::client;
-use crate::{
-    cli::{Cli, extract_signer_cli_arguments},
-    cli_interactor::{Interactor, InteractorPrompt, PromptInputParms},
-    client::{MockClient, Client, Connect, fetching_with_report, get_repo_ref_from_cache, send_events},
-    git::{Repo, RepoActions, nostr_url::convert_clone_url_to_https},
-    login,
-    repo_ref::{
-        RepoRef, extract_pks, get_repo_config_from_yaml, save_repo_config_to_yaml,
-        try_and_get_repo_coordinates_when_remote_unknown,
-    },
-};
 #[derive(Debug, clap::Args)]
 pub struct SubCommandArgs {
     #[clap(short, long)]
@@ -92,7 +94,12 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
 
     #[cfg(test)]
     let repo_ref = if let Some(repo_coordinate) = &repo_coordinate {
-		fetching_with_report(git_repo_path, &<client::MockConnect as client::Connect>::default(), repo_coordinate).await?;
+        fetching_with_report(
+            git_repo_path,
+            &<client::MockConnect as client::Connect>::default(),
+            repo_coordinate,
+        )
+        .await?;
         if let Ok(repo_ref) = get_repo_ref_from_cache(Some(git_repo_path), repo_coordinate).await {
             Some(repo_ref)
         } else {
@@ -117,7 +124,7 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
         &Some(&git_repo),
         &extract_signer_cli_arguments(cli_args).unwrap_or(None),
         &cli_args.password,
-		Some(&<client::MockConnect as client::Connect>::default()),
+        Some(&<client::MockConnect as client::Connect>::default()),
         true,
     )
     .await?;
@@ -462,8 +469,8 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
 
     #[cfg(test)]
     send_events(
-		//&<client::MockConnect as client::Connect>,
-		&<client::MockConnect as client::Connect>::default(),
+        //&<client::MockConnect as client::Connect>,
+        &<client::MockConnect as client::Connect>::default(),
         Some(git_repo_path),
         vec![repo_event],
         user_ref.relays.write(),

@@ -1,4 +1,3 @@
-use anyhow::{Context, Result};
 use crate::{
     cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms},
     login::{
@@ -7,6 +6,7 @@ use crate::{
         fresh::generate_qr,
     },
 };
+use anyhow::{Context, Result};
 
 use crate::git::Repo;
 

@@ -1,6 +1,6 @@
+use crate::login::SignerInfo;
 use anyhow::{Result, bail};
 use clap::{Parser, Subcommand};
-use crate::login::SignerInfo;
 
 use crate::sub_commands;
 
