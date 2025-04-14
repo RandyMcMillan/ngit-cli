@@ -1,17 +1,13 @@
-use crate::{
-    cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms},
-    git::{get_git_config_item, remove_git_config_item},
-    login::{SignerInfoSource, existing::load_existing_login},
-};
 use anyhow::{Context, Result};
 use clap;
 
-use crate::client;
 use crate::{
     cli::{Cli, extract_signer_cli_arguments},
+    cli_interactor::{Interactor, InteractorPrompt, PromptChoiceParms},
+    client,
     client::{Client, Connect},
-    git::Repo,
-    login::fresh::fresh_login_or_signup,
+    git::{Repo, get_git_config_item, remove_git_config_item},
+    login::{SignerInfoSource, existing::load_existing_login, fresh::fresh_login_or_signup},
 };
 #[derive(clap::Args)]
 pub struct SubCommandArgs {
