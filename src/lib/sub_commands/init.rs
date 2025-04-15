@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-
+use clap::Parser;
 use anyhow::{Context, Result};
 use console::{Style, Term};
 use nostr::{
@@ -58,7 +58,8 @@ pub struct SubCommandArgs {
 }
 
 #[allow(clippy::too_many_lines)]
-pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
+pub async fn launch(args: &SubCommandArgs) -> Result<()> {
+	let cli_args = Cli::parse();
     let git_repo = Repo::discover().context("failed to find a git repository")?;
     let git_repo_path = git_repo.get_path()?;
 
@@ -112,7 +113,7 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
     #[cfg(not(test))]
     let (signer, user_ref, _) = login::login_or_signup(
         &Some(&git_repo),
-        &extract_signer_cli_arguments(cli_args).unwrap_or(None),
+        &extract_signer_cli_arguments(&cli_args).unwrap_or(None),
         &cli_args.password,
         Some(&client),
         true,
@@ -122,7 +123,7 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
     #[cfg(test)]
     let (signer, user_ref, _) = login::login_or_signup(
         &Some(&git_repo),
-        &extract_signer_cli_arguments(cli_args).unwrap_or(None),
+        &extract_signer_cli_arguments(&cli_args).unwrap_or(None),
         &cli_args.password,
         Some(&<client::MockConnect as client::Connect>::default()),
         true,

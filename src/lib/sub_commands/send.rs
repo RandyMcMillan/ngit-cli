@@ -1,5 +1,5 @@
 use std::path::Path;
-
+use clap::Parser;
 use anyhow::{Context, Result, bail};
 use console::Style;
 use nostr::{
@@ -48,7 +48,10 @@ pub struct SubCommandArgs {
 }
 
 #[allow(clippy::too_many_lines)]
-pub async fn launch(cli_args: &Cli, args: &SubCommandArgs, no_fetch: bool) -> Result<()> {
+pub async fn launch(args: &SubCommandArgs, no_fetch: bool) -> Result<()> {
+//pub async fn launch(cli_args: &Cli, no_fetch: bool) -> Result<()> {
+//pub async fn launch(args: &SubCommandArgs, no_fetch: bool) -> Result<()> {
+    let cli_args = Cli::parse();
     let git_repo = Repo::discover().context("failed to find a git repository")?;
     let git_repo_path = git_repo.get_path()?;
 
@@ -188,7 +191,7 @@ pub async fn launch(cli_args: &Cli, args: &SubCommandArgs, no_fetch: bool) -> Re
 
     let (signer, user_ref, _) = login::login_or_signup(
         &Some(&git_repo),
-        &extract_signer_cli_arguments(cli_args).unwrap_or(None),
+        &extract_signer_cli_arguments(&cli_args).unwrap_or(None),
         &cli_args.password,
         #[cfg(test)]
         Some(&<client::MockConnect as client::Connect>::default()),
