@@ -1219,6 +1219,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "gnostr-ngit"
+version = "1.6.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "async-trait",
+ "auth-git2",
+ "chacha20poly1305",
+ "clap",
+ "console",
+ "dialoguer",
+ "directories",
+ "duplicate",
+ "futures",
+ "git2",
+ "indicatif",
+ "keyring",
+ "mockall",
+ "nostr",
+ "nostr-connect",
+ "nostr-database",
+ "nostr-lmdb",
+ "nostr-sdk",
+ "once_cell",
+ "passwords",
+ "qrcode",
+ "scrypt",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "serial_test",
+ "test_utils",
+ "tokio",
+ "urlencoding",
+ "zeroize",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1925,44 +1963,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a88da9dd148bbcdce323dd6ac47d369b4769d4a3b78c6c52389b9269f77932"
 
 [[package]]
-name = "ngit"
-version = "1.6.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "async-trait",
- "auth-git2",
- "chacha20poly1305",
- "clap",
- "console",
- "dialoguer",
- "directories",
- "duplicate",
- "futures",
- "git2",
- "indicatif",
- "keyring",
- "mockall",
- "nostr",
- "nostr-connect",
- "nostr-database",
- "nostr-lmdb",
- "nostr-sdk",
- "once_cell",
- "passwords",
- "qrcode",
- "scrypt",
- "serde",
- "serde_json",
- "serde_yaml",
- "serial_test",
- "test_utils",
- "tokio",
- "urlencoding",
- "zeroize",
-]
-
-[[package]]
 name = "nix"
 version = "0.26.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2351,18 +2351,18 @@ dependencies = [
 
 [[package]]
 name = "pin-project"
-version = "1.1.7"
+version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be57f64e946e500c8ee36ef6331845d40a93055567ec57e8fae13efd33759b95"
+checksum = "677f1add503faace112b9f1373e43e9e054bfdd22ff1a63c1bc485eaec6a6a8a"
 dependencies = [
  "pin-project-internal",
 ]
 
 [[package]]
 name = "pin-project-internal"
-version = "1.1.7"
+version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c0f5fad0874fc7abcd4d750e76917eaebbecaa2c20bde22e1dbeeba8beb758c"
+checksum = "6e918e4ff8c4549eb882f14b3a4bc8c8bc93de829416eacf579f1207a8fbf861"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2768,7 +2768,6 @@ dependencies = [
 [[package]]
 name = "rexpect"
 version = "0.5.0"
-source = "git+https://github.com/rust-cli/rexpect.git?rev=9eb61dd#9eb61dd444f25307639367ac7e1a49d5a1915d55"
 dependencies = [
  "comma",
  "nix 0.27.1",
@@ -3125,7 +3124,6 @@ dependencies = [
 [[package]]
 name = "simple-websockets"
 version = "0.1.6"
-source = "git+https://github.com/DanConwayDev/simple-websockets?branch=auto-release-port#f53d7662ddf10d926e46c34e7d4044c0ebc21bb0"
 dependencies = [
  "flume",
  "futures-util",

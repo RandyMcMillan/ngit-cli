@@ -1,5 +1,5 @@
 [package]
-name = "ngit"
+name = "gnostr-ngit"
 version = "1.6.0"
 edition = "2021"
 description = "nostr plugin for git"
@@ -58,8 +58,8 @@ path = "src/lib/mod.rs"
 
 [[bin]]
 name = "ngit"
-path = "src/bin/ngit/main.rs"
+path = "src/ngit/main.rs"
 
 [[bin]]
 name = "git-remote-nostr"
-path = "src/bin/git_remote_nostr/main.rs"
+path = "src/git_remote_nostr/main.rs"
