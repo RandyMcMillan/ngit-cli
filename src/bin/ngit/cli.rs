@@ -11,9 +11,9 @@ use crate::sub_commands;
     help_template = "{name} {version}\nnostr plugin for git\n - clone a nostr repository, or add as a remote, by using the url format nostr://pub123/identifier\n - remote branches beginning with `pr/` are open PRs from contributors; `ngit list` can be used to view all PRs\n - to open a PR, push a branch with the prefix `pr/` or use `ngit send` for advanced options\n- publish a repository to nostr with `ngit init`\n\n{usage}\n{all-args}"
 )]
 #[command(propagate_version = true)]
-pub struct Cli {
+pub struct NgitCli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: NgitCommands,
     /// remote signer address
     #[arg(long, global = true, hide = true)]
     pub bunker_uri: Option<String>,
@@ -31,7 +31,7 @@ pub struct Cli {
     pub disable_cli_spinners: bool,
 }
 
-pub fn extract_signer_cli_arguments(args: &Cli) -> Result<Option<SignerInfo>> {
+pub fn extract_signer_cli_arguments(args: &NgitCli) -> Result<Option<SignerInfo>> {
     if let Some(nsec) = &args.nsec {
         Ok(Some(SignerInfo::Nsec {
             nsec: nsec.to_string(),
@@ -56,7 +56,7 @@ pub fn extract_signer_cli_arguments(args: &Cli) -> Result<Option<SignerInfo>> {
 }
 
 #[derive(Subcommand)]
-pub enum Commands {
+pub enum NgitCommands {
     /// signal you are this repo's maintainer accepting PRs and issues via nostr
     Init(sub_commands::init::SubCommandArgs),
     /// submit PR with advanced options

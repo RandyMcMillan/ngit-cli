@@ -7,7 +7,7 @@ use ngit::{
 };
 
 use crate::{
-    cli::{Cli, extract_signer_cli_arguments},
+    cli::{NgitCli, extract_signer_cli_arguments},
     client::{Client, Connect},
     git::Repo,
     login::fresh::fresh_login_or_signup,
@@ -24,7 +24,7 @@ pub struct SubCommandArgs {
     offline: bool,
 }
 
-pub async fn launch(args: &Cli, command_args: &SubCommandArgs) -> Result<()> {
+pub async fn launch(args: &NgitCli, command_args: &SubCommandArgs) -> Result<()> {
     let client = if command_args.offline {
         None
     } else {

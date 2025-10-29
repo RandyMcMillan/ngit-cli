@@ -16,7 +16,7 @@ use nostr_0_37_0::{
 use nostr_sdk_0_37_0::{Kind, RelayUrl};
 
 use crate::{
-    cli::{Cli, extract_signer_cli_arguments},
+    cli::{NgitCli, extract_signer_cli_arguments},
     cli_interactor::{Interactor, InteractorPrompt, PromptInputParms},
     client::{Client, Connect, fetching_with_report, get_repo_ref_from_cache, send_events},
     git::{Repo, RepoActions, nostr_url::convert_clone_url_to_https},
@@ -56,7 +56,7 @@ pub struct SubCommandArgs {
 }
 
 #[allow(clippy::too_many_lines)]
-pub async fn launch(cli_args: &Cli, args: &SubCommandArgs) -> Result<()> {
+pub async fn launch(cli_args: &NgitCli, args: &SubCommandArgs) -> Result<()> {
     let git_repo = Repo::discover().context("failed to find a git repository")?;
     let git_repo_path = git_repo.get_path()?;
 
